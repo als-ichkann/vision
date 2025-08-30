@@ -1,0 +1,98 @@
+{
+  "robot_config": {
+    "ip": "localhost",
+    "port": 8899,
+    "connection_timeout": 5.0,
+    "startup_collision_level": 6,
+    "joint_max_acc": [1.0, 1.0, 1.0, 1.0, 1.0, 1.0],
+    "joint_max_vel": [1.0, 1.0, 1.0, 1.0, 1.0, 1.0],
+    "end_max_line_acc": 0.1,
+    "end_max_line_vel": 0.05,
+    "end_max_angle_acc": 0.5,
+    "end_max_angle_vel": 0.3
+  },
+  
+  "camera_config": {
+    "width": 640,
+    "height": 480,
+    "fps": 30,
+    "color_format": "bgr8",
+    "depth_format": "z16",
+    "enable_alignment": true,
+    "calibration_file": "camera_calibration.json"
+  },
+  
+  "yolo_config": {
+    "model_path": "yolo_train/weights/best.pt",
+    "confidence_threshold": 0.5,
+    "input_size": 640,
+    "device": "auto"
+  },
+  
+  "pbvs_config": {
+    "desired_position": [0.0, 0.0, 0.4],
+    "desired_orientation": [[1, 0, 0], [0, 1, 0], [0, 0, 1]],
+    "object_3d_points": [
+      [-0.05, -0.05, 0],
+      [0.05, -0.05, 0],
+      [0.05, 0.05, 0],
+      [-0.05, 0.05, 0]
+    ],
+    "lambda_pos": 0.3,
+    "lambda_rot": 0.2,
+    "position_deadzone": 0.01,
+    "orientation_deadzone": 0.05,
+    "convergence_threshold": 0.01
+  },
+  
+  "ibvs_config": {
+    "desired_features": [320, 240, 120, 120],
+    "lambda_pos": 0.3,
+    "feature_deadzone": 8,
+    "default_feature_depth": 0.4,
+    "convergence_threshold": 5.0
+  },
+  
+  "control_config": {
+    "max_linear_velocity": 0.05,
+    "max_angular_velocity": 0.3,
+    "control_frequency": 10.0,
+    "velocity_filter_alpha": 0.8,
+    "enable_velocity_smoothing": true
+  },
+  
+  "safety_config": {
+    "enable_collision_detection": true,
+    "max_target_lost_count": 20,
+    "emergency_stop_on_target_lost": true,
+    "workspace_limits": {
+      "x_min": -0.5,
+      "x_max": 0.5,
+      "y_min": -0.5,
+      "y_max": 0.5,
+      "z_min": 0.1,
+      "z_max": 1.0
+    },
+    "velocity_limits": {
+      "linear_max": 0.1,
+      "angular_max": 0.5
+    }
+  },
+  
+  "logging_config": {
+    "enable_data_logging": true,
+    "log_frequency": 10.0,
+    "save_images": false,
+    "log_directory": "logs",
+    "max_log_files": 10
+  },
+  
+  "visualization_config": {
+    "show_desired_position": true,
+    "show_target_bbox": true,
+    "show_feature_points": true,
+    "show_trajectory": false,
+    "display_info_overlay": true,
+    "save_visualization": false
+  }
+}
