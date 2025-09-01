@@ -5,16 +5,17 @@
 ## 目录
 
 1. [系统概述](#系统概述)
-2. [功能特性](#功能特性)
-3. [环境要求](#环境要求)
-4. [快速开始](#快速开始)
-5. [视觉伺服方法](#视觉伺服方法)
-6. [系统架构](#系统架构)
-7. [参数配置](#参数配置)
-8. [使用指南](#使用指南)
-9. [故障排除](#故障排除)
-10. [API参考](#api参考)
-11. [扩展开发](#扩展开发)
+2. [环境设置](#环境设置)
+3. [代码文件说明](#代码文件说明)
+4. [功能特性](#功能特性)
+5. [快速开始](#快速开始)
+6. [视觉伺服方法](#视觉伺服方法)
+7. [系统架构](#系统架构)
+8. [参数配置](#参数配置)
+9. [使用指南](#使用指南)
+10. [故障排除](#故障排除)
+11. [API参考](#api参考)
+12. [扩展开发](#扩展开发)
 
 ## 系统概述
 
@@ -24,6 +25,224 @@
 - **IBVS (Image-Based Visual Servoing)**: 基于图像的视觉伺服 - 直接在图像空间中进行伺服控制
 
 系统集成了Auboi5机器人控制、YOLO目标检测和RealSense深度相机，可以实现对目标物体的精确视觉伺服控制。
+
+## 环境设置
+
+### 已完成的设置
+
+✅ **Miniconda已安装**: `/home/wang-yb/miniconda3/`  
+✅ **conda环境已创建**: `vision` (Python 3.8)  
+✅ **依赖包已安装**: 所有requirements.txt中的包  
+✅ **环境测试通过**: 所有关键依赖包可正常导入  
+
+### 快速启动环境
+
+#### 方法1：使用设置脚本（推荐）
+
+```bash
+# 在项目目录中运行
+./setup_environment.sh
+```
+
+#### 方法2：手动激活环境
+
+```bash
+# 激活conda环境
+source ~/miniconda3/etc/profile.d/conda.sh
+conda activate vision
+
+# 验证环境
+python --version  # 应该显示Python 3.8.x
+which python      # 应该显示conda环境中的Python路径
+```
+
+### 环境信息
+
+- **环境名称**: `vision`
+- **Python版本**: 3.8.20
+- **conda位置**: `/home/wang-yb/miniconda3/`
+- **环境位置**: `/home/wang-yb/miniconda3/envs/vision/`
+
+### 已安装的核心依赖
+
+- `opencv-python>=4.5.0` - 计算机视觉库
+- `numpy>=1.21.0` - 数值计算库
+- `pyrealsense2>=2.50.0` - RealSense相机SDK
+- `ultralytics>=8.0.0` - YOLO目标检测
+- `torch>=1.9.0` - PyTorch深度学习框架
+- `torchvision>=0.10.0` - PyTorch视觉工具
+- `scipy>=1.7.0` - 科学计算库
+- `matplotlib>=3.3.0` - 绘图库
+- `Pillow>=8.3.0` - 图像处理库
+
+### 避免ROS2冲突
+
+- 使用独立的conda环境 `vision`
+- 与系统Python和ROS2 Python完全隔离
+- 每个环境有独立的包管理
+
+## 代码文件说明
+
+### 核心驱动程序
+
+#### 1. `robot_visual_servoing_integrated.py`
+**主要功能**: 整合的视觉伺服驱动系统
+- **作用**: 系统的主入口，集成了PBVS和IBVS两种视觉伺服方法
+- **核心类**: `RobotVisualServoing` - 完整的视觉伺服控制系统
+- **主要功能**:
+  - 机器人连接和控制
+  - RealSense相机管理
+  - YOLO目标检测
+  - PBVS和IBVS控制算法
+  - 实时可视化和用户交互
+- **运行方式**: `python robot_visual_servoing_integrated.py`
+- **支持模式**: 
+  - 模式1: PBVS（基于位置的视觉伺服）
+  - 模式2: IBVS（基于图像的视觉伺服）
+
+#### 2. `robotcontrol.py`
+**主要功能**: Auboi5机器人控制接口
+- **作用**: 提供与Auboi5机械臂的底层通信接口
+- **核心类**: `Auboi5Robot` - 机器人控制器
+- **主要功能**:
+  - 机器人连接和初始化
+  - 运动控制（关节空间和笛卡尔空间）
+  - 安全监控和错误处理
+  - 日志记录和状态监控
+- **依赖库**: `libpyauboi5` - Auboi5机器人SDK
+- **使用场景**: 被其他模块调用，不直接运行
+
+### 基础组件模块
+
+#### 3. `visual_servoing.py`
+**主要功能**: 基础视觉伺服实现
+- **作用**: 提供基本的视觉伺服算法框架
+- **核心类**: `VisualServoing` - 视觉伺服基类
+- **主要功能**:
+  - PBVS位姿估计和控制
+  - IBVS图像特征提取和控制
+  - 相机图像获取和处理
+  - 目标检测接口
+- **特点**: 教学和演示用途，功能相对简化
+- **运行方式**: 作为库文件被其他模块导入
+
+#### 4. `advanced_visual_servoing.py`
+**主要功能**: 高级视觉伺服系统
+- **作用**: 提供更复杂的视觉伺服功能和算法
+- **核心类**: `AdvancedVisualServoing` - 高级视觉伺服系统
+- **主要功能**:
+  - 多线程图像处理
+  - 自适应控制算法
+  - 高级滤波和预测
+  - 性能监控和分析
+- **特点**: 研究和高级应用用途
+- **运行方式**: 可独立运行或作为库导入
+
+#### 5. `camera_calibration.py`
+**主要功能**: 相机标定工具
+- **作用**: 标定RealSense相机的内参矩阵和畸变系数
+- **核心类**: `CameraCalibration` - 相机标定工具
+- **主要功能**:
+  - 棋盘格图像采集
+  - 相机内参标定
+  - 畸变系数计算
+  - 标定结果保存和加载
+- **输出文件**: `camera_calibration.json` - 标定参数文件
+- **运行方式**: `python camera_calibration.py`
+- **使用流程**:
+  1. 准备9x6内角点的标准棋盘格
+  2. 在不同角度拍摄20张图像
+  3. 自动计算并保存标定参数
+
+### 目标检测模块
+
+#### 6. `yolo_detect.py`
+**主要功能**: YOLO目标检测演示
+- **作用**: 使用训练好的YOLO模型进行实时目标检测
+- **主要功能**:
+  - 加载YOLO模型
+  - RealSense相机图像获取
+  - 实时目标检测和显示
+  - 深度信息获取
+- **模型文件**: 使用 `yolo_train/weights/best.pt`
+- **运行方式**: `python yolo_detect.py`
+- **使用场景**: 测试YOLO模型性能，验证检测效果
+
+#### 7. `yolo_train.py`
+**主要功能**: YOLO模型训练脚本
+- **作用**: 训练自定义的YOLO目标检测模型
+- **主要功能**:
+  - 加载预训练YOLOv5模型
+  - 使用自定义数据集训练
+  - 模型权重保存
+- **配置文件**: 需要配置数据集路径（当前指向番茄检测数据集）
+- **输出目录**: `yolo_train/` - 训练结果和权重文件
+- **运行方式**: `python yolo_train.py`
+- **训练参数**: 100轮训练，640像素图像尺寸
+
+### 测试和验证模块
+
+#### 8. `test_system.py`
+**主要功能**: 系统功能测试
+- **作用**: 快速测试系统各个组件的工作状态
+- **主要功能**:
+  - 测试相机连接
+  - 测试YOLO模型加载
+  - 测试机器人连接
+  - 系统完整性验证
+- **运行方式**: `python test_system.py --all`
+- **测试项目**:
+  - RealSense相机连接和图像获取
+  - YOLO模型加载和推理
+  - 依赖库完整性检查
+
+#### 9. `test_visual_servoing.py`
+**主要功能**: 视觉伺服系统测试
+- **作用**: 专门测试视觉伺服功能的脚本
+- **主要功能**:
+  - 检查依赖库安装
+  - 测试相机标定
+  - 测试YOLO检测
+  - 视觉伺服算法验证
+- **运行方式**: `python test_visual_servoing.py`
+- **使用场景**: 调试和验证视觉伺服算法
+
+### 配置和权重文件
+
+#### 10. `requirements.txt`
+**主要功能**: Python依赖包列表
+- **作用**: 定义项目所需的所有Python包及版本
+- **包含的主要包**:
+  - opencv-python, numpy, scipy - 计算机视觉和数值计算
+  - pyrealsense2 - RealSense相机支持
+  - ultralytics - YOLO目标检测
+  - torch, torchvision - 深度学习框架
+  - matplotlib, Pillow - 图像处理和可视化
+- **使用方式**: `pip install -r requirements.txt`
+
+#### 11. `setup_environment.sh`
+**主要功能**: 环境设置脚本
+- **作用**: 自动激活conda环境并进行环境检查
+- **主要功能**:
+  - 激活vision conda环境
+  - 检查Python版本
+  - 验证关键依赖包
+- **运行方式**: `./setup_environment.sh`
+
+#### 12. `yolov5nu.pt`
+**主要功能**: 预训练YOLO模型
+- **作用**: YOLOv5的预训练权重文件
+- **使用场景**: 作为训练的起始点或直接用于检测
+
+#### 13. `yolo_train/` 目录
+**主要功能**: YOLO训练输出目录
+- **作用**: 存储YOLO模型训练的所有结果
+- **主要文件**:
+  - `weights/best.pt` - 训练得到的最佳模型权重
+  - `weights/last.pt` - 最后一轮的模型权重
+  - `results.csv` - 训练过程数据
+  - `*.png` - 训练过程可视化图表
+  - `args.yaml` - 训练参数配置
 
 ## 功能特性
 
@@ -46,31 +265,19 @@
 - 交互式参数调整
 - 详细的状态反馈
 
-## 环境要求
-
-### 硬件要求
-- Auboi5机械臂或兼容机器人
-- Intel RealSense 深度相机 (D435/D455等)
-- 标准棋盘格标定板 (可选，用于精确标定)
-
-### 软件依赖
-```bash
-pip install opencv-python
-pip install numpy
-pip install scipy
-pip install pyrealsense2
-pip install ultralytics
-```
-
-### 系统要求
-- Python 3.7+
-- Windows/Linux
-- 至少4GB内存
-- 支持CUDA的GPU (推荐，用于YOLO加速)
-
 ## 快速开始
 
-### 1. 系统测试
+### 1. 环境准备
+```bash
+# 激活conda环境
+source ~/miniconda3/etc/profile.d/conda.sh
+conda activate vision
+
+# 或使用设置脚本
+./setup_environment.sh
+```
+
+### 2. 系统测试
 ```bash
 # 测试相机连接
 python -c "import pyrealsense2 as rs; print('RealSense相机可用')"
@@ -78,21 +285,26 @@ python -c "import pyrealsense2 as rs; print('RealSense相机可用')"
 # 测试YOLO模型
 python -c "from ultralytics import YOLO; print('YOLO模型可用')"
 
-# 运行系统测试
+# 运行完整系统测试
 python test_system.py --all
 ```
 
-### 2. 运行视觉伺服
+### 3. 相机标定（首次使用）
+```bash
+python camera_calibration.py
+```
+
+### 4. 运行视觉伺服
 ```bash
 # 运行主程序
 python robot_visual_servoing_integrated.py
 ```
 
-### 3. 选择模式
+### 5. 选择模式
 - **模式1**: PBVS - 适用于精确位置控制
 - **模式2**: IBVS - 适用于图像空间控制
 
-### 4. 操作控制
+### 6. 操作控制
 - **'q'**: 退出程序
 - **'e'**: 紧急停止
 - **'r'**: (IBVS模式) 重新设置期望特征
@@ -162,10 +374,10 @@ python robot_visual_servoing_integrated.py
 ## 系统架构
 
 ```
-robot_visual_servoing_integrated.py
+robot_visual_servoing_integrated.py (主驱动程序)
 │
 ├── RobotVisualServoing (主类)
-│   ├── 机器人控制接口
+│   ├── 机器人控制接口 (robotcontrol.py)
 │   │   ├── connect_robot()
 │   │   ├── send_velocity_command()
 │   │   └── emergency_stop_robot()
@@ -173,7 +385,7 @@ robot_visual_servoing_integrated.py
 │   ├── 视觉系统
 │   │   ├── setup_camera()
 │   │   ├── get_frames()
-│   │   └── detect_target()
+│   │   └── detect_target() (YOLO)
 │   │
 │   ├── PBVS模块
 │   │   ├── estimate_target_pose_pbvs()
@@ -185,6 +397,16 @@ robot_visual_servoing_integrated.py
 │       ├── extract_image_features_ibvs()
 │       ├── compute_control_law_ibvs()
 │       └── visualize_ibvs()
+│
+├── 辅助工具
+│   ├── camera_calibration.py (相机标定)
+│   ├── yolo_train.py (模型训练)
+│   ├── yolo_detect.py (检测测试)
+│   └── test_system.py (系统测试)
+│
+└── 基础模块
+    ├── visual_servoing.py (基础实现)
+    └── advanced_visual_servoing.py (高级功能)
 ```
 
 ## 参数配置
@@ -249,7 +471,8 @@ dist_coeffs = [0.1, -0.2, 0, 0, 0]
 - 连接RealSense相机
 - 检查网络连接
 
-# 启动系统
+# 激活环境并启动系统
+conda activate vision
 python robot_visual_servoing_integrated.py
 ```
 
@@ -331,30 +554,6 @@ aggressive_params = {
 4. 监控系统稳定性
 ```
 
-### 相机标定
-
-首先需要对相机进行标定以获得准确的内参矩阵：
-
-```bash
-python camera_calibration.py
-```
-
-标定流程：
-1. 选择 "1. 运行完整标定流程"
-2. 准备9x6内角点的标准棋盘格
-3. 在不同角度和距离拍摄20张棋盘格图像
-4. 系统自动计算相机内参并保存到 `camera_calibration.json`
-
-### YOLO模型训练
-
-使用您的目标物体数据集训练YOLO模型：
-
-```bash
-python yolo_train.py
-```
-
-训练完成后，模型权重保存在 `yolo_train/weights/best.pt`
-
 ## 故障排除
 
 ### 常见问题及解决方案
@@ -412,6 +611,25 @@ python yolo_train.py
 - 校准深度相机
 ```
 
+#### 6. conda环境问题
+**问题**: conda命令未找到或环境冲突
+```bash
+解决方案:
+# 重新初始化conda
+source ~/miniconda3/etc/profile.d/conda.sh
+conda init bash
+source ~/.bashrc
+
+# 检查环境是否正确激活
+conda info --envs
+which python
+
+# 与ROS2冲突时的处理
+- 确保在conda环境中运行项目
+- 检查PYTHONPATH环境变量
+- 使用 conda deactivate 退出环境后再使用ROS2
+```
+
 ### 调试技巧
 
 #### 1. 可视化调试
@@ -436,16 +654,6 @@ python yolo_train.py
 3. 检查控制律计算
 4. 测试机器人响应
 5. 整体系统集成
-```
-
-#### 3. 参数敏感性分析
-```python
-# 测试不同参数组合
-for lambda_pos in [0.1, 0.2, 0.3, 0.4, 0.5]:
-    for lambda_rot in [0.1, 0.15, 0.2, 0.25, 0.3]:
-        # 运行短时间测试
-        # 记录性能指标
-        # 分析稳定性和收敛速度
 ```
 
 ## API参考
@@ -493,57 +701,6 @@ def cleanup(self):
     """清理系统资源"""
 ```
 
-#### PBVS专用方法
-```python
-def estimate_target_pose_pbvs(self, target) -> Optional[Dict]:
-    """估计目标3D位姿"""
-
-def compute_pose_error_pbvs(self, current_pose) -> Optional[np.ndarray]:
-    """计算位姿误差"""
-
-def compute_control_law_pbvs(self, pose_error) -> np.ndarray:
-    """计算PBVS控制律"""
-
-def visualize_pbvs(self, image, target):
-    """PBVS可视化"""
-```
-
-#### IBVS专用方法
-```python
-def extract_image_features_ibvs(self, target, depth_image) -> Optional[np.ndarray]:
-    """提取图像特征"""
-
-def compute_control_law_ibvs(self, current_features) -> np.ndarray:
-    """计算IBVS控制律"""
-
-def visualize_ibvs(self, image, target):
-    """IBVS可视化"""
-```
-
-### 数据结构
-
-#### 目标检测结果
-```python
-target = {
-    'center': (x, y),           # 目标中心像素坐标
-    'size': (width, height),    # 目标尺寸
-    'confidence': 0.85          # 检测置信度
-}
-```
-
-#### 目标位姿 (PBVS)
-```python
-target_pose = {
-    'position': np.array([x, y, z]),        # 3D位置 (米)
-    'orientation': np.array([[...]])         # 3×3旋转矩阵
-}
-```
-
-#### 图像特征 (IBVS)
-```python
-features = np.array([x, y, width, height, depth])  # 图像特征向量
-```
-
 ## 扩展开发
 
 ### 1. 添加新的视觉伺服方法
@@ -589,100 +746,14 @@ class ROSVisualServoing(RobotVisualServoing):
         return True
 ```
 
-### 3. 添加多目标支持
+## 实际应用示例
 
-```python
-def detect_multiple_targets(self, color_image):
-    """检测多个目标"""
-    results = self.model(color_image)
-    targets = []
-    
-    for box in results[0].boxes:
-        if box.conf[0].cpu().numpy() > 0.5:
-            x_center, y_center, width, height = box.xywh[0].cpu().numpy()
-            targets.append({
-                'center': (int(x_center), int(y_center)),
-                'size': (int(width), int(height)),
-                'confidence': float(box.conf[0].cpu().numpy()),
-                'class': int(box.cls[0].cpu().numpy())
-            })
-    
-    return targets
-```
-
-### 4. 添加学习能力
-
-```python
-class AdaptiveVisualServoing(RobotVisualServoing):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.performance_history = []
-        self.adaptive_gains = True
-    
-    def adapt_parameters(self, error_history):
-        """根据历史性能自适应调整参数"""
-        recent_errors = error_history[-10:]  # 最近10次误差
-        avg_error = np.mean([np.linalg.norm(e) for e in recent_errors])
-        
-        if avg_error > 0.1:  # 误差较大，降低增益
-            self.lambda_pos *= 0.9
-        elif avg_error < 0.02:  # 误差较小，可以提高增益
-            self.lambda_pos *= 1.1
-        
-        # 限制增益范围
-        self.lambda_pos = np.clip(self.lambda_pos, 0.1, 0.8)
-```
-
-### 5. 性能监控和分析
-
-```python
-class PerformanceMonitor:
-    def __init__(self):
-        self.metrics = {
-            'convergence_time': [],
-            'steady_state_error': [],
-            'control_effort': [],
-            'success_rate': 0
-        }
-    
-    def update_metrics(self, error, control_cmd, timestamp):
-        """更新性能指标"""
-        self.metrics['steady_state_error'].append(np.linalg.norm(error))
-        self.metrics['control_effort'].append(np.linalg.norm(control_cmd))
-    
-    def generate_report(self):
-        """生成性能报告"""
-        report = {
-            'avg_error': np.mean(self.metrics['steady_state_error']),
-            'max_error': np.max(self.metrics['steady_state_error']),
-            'avg_control': np.mean(self.metrics['control_effort']),
-            'stability_score': self.calculate_stability()
-        }
-        return report
-```
-
-## 文件说明
-
-### 核心文件
-- `robot_visual_servoing_integrated.py` - 整合的主要驱动代码
-- `test_system.py` - 系统测试脚本
-- `robotcontrol.py` - 机器人控制接口
-
-### 基础组件
-- `visual_servoing.py` - 基础视觉伺服实现
-- `advanced_visual_servoing.py` - 高级视觉伺服系统
-- `camera_calibration.py` - 相机标定工具
-- `yolo_detect.py` - YOLO目标检测
-- `yolo_train.py` - YOLO模型训练
-
-### 实际应用示例
-
-#### 机器人抓取任务
+### 机器人抓取任务
 1. 使用YOLO检测目标物体
 2. 使用PBVS将机器人移动到目标上方
 3. 执行抓取动作
 
-#### 目标跟踪任务
+### 目标跟踪任务
 1. 使用IBVS保持目标在图像中心
 2. 维持固定的观察距离和角度
 
@@ -705,11 +776,8 @@ class PerformanceMonitor:
 3. 通过所有测试用例
 4. 提供使用示例
 
-### 联系信息
-- GitHub Issues: 提交问题和建议
-- 邮件: 联系项目维护者
-- 文档: 查看最新文档和更新
-
 ---
 
 **安全提醒**: 使用本系统前请确保充分了解机器人安全操作规程，并在安全的环境中进行测试。建议先在仿真环境中验证算法，再部署到实际机器人系统。
+
+**环境提醒**: 每次运行项目前，请确保已激活conda环境 `vision`。
