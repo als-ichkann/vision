@@ -1809,9 +1809,9 @@ class Auboi5Robot:
             logger.warn("RSHD uninitialized or not login!!!")
             return RobotErrorType.RobotError_NotLogin     
 
-    def rs_project_stop(self):
+    def project_stop(self):
         """
-        * FUNCTION:    rs_project_stop
+        * FUNCTION:    project_stop
         * DESCRIPTION: 通知机械臂工程停止，服务器停止检测安全IO
         * INPUTS:
         * OUTPUTS:
@@ -2816,6 +2816,7 @@ def test_process_demo():
         if result != RobotErrorType.RobotError_SUCC:
             logger.info("connect server{0}:{1} failed.".format(ip, port))
         else:
+            robot.project_startup()
             robot.enable_robot_event()
             robot.init_profile()
             joint_maxvelc = (2.596177, 2.596177, 2.596177, 3.110177, 3.110177, 3.110177)
@@ -2839,6 +2840,8 @@ def test_process_demo():
                 print("-----------------------------")
 
                 queue.put(joint_radian)
+
+                robot.project_stop()
 
                 # time.sleep(5)
 
